@@ -14,13 +14,11 @@ st.set_page_config(
     page_title="GPS Club Atletico Colon",
     layout="wide"
 )
+
 col1, col2 = st.columns([1, 6])
 
 with col1:
-    st.image(
-        "escudo_colon.png",
-        width=120,   # probá entre 100 y 140
-    )
+    st.image("escudo_colon.png", width=120)
 
 with col2:
     st.markdown(
@@ -40,9 +38,10 @@ def cargar_datos():
 df = cargar_datos()
 
 # ==================================
-# SIDEBAR – FILTRO POSICIÓN
+# SIDEBAR
 # ==================================
 st.sidebar.header("Filtros")
+
 if st.sidebar.button("🔄 Actualizar datos"):
     st.cache_data.clear()
     st.rerun()
@@ -57,7 +56,6 @@ posiciones_sel = st.sidebar.multiselect(
 df = df[df["Position Name"].isin(posiciones_sel)].copy()
 
 # ==================================
-# ==================================
 # PESTAÑAS
 # ==================================
 tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_equipo = st.tabs([
@@ -70,54 +68,47 @@ tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_eq
     "📌 Promedios equipo"
 ])
 
-# ======================================================
+# ==================================
 # BIENVENIDA
-# ======================================================
+# ==================================
 with tab_bienvenida:
-    st.markdown(
-        """
-        ### 👋 Bienvenido
+    st.markdown("""
+    ### 👋 Bienvenido
 
-        Esta herramienta está diseñada para **analizar el rendimiento físico**
-        de los jugadores a partir de datos GPS.
+    Dashboard de análisis **GPS profesional**.
 
-        #### ¿Qué vas a encontrar?
-        - Rankings de velocidad máxima y media  
-        - Evolución individual por jugador  
-        - Comparaciones entre jugadores  
-        - Alertas de fatiga  
-        - Promedios generales del equipo  
+    - Rankings de velocidad
+    - Evolución individual
+    - Comparativas
+    - Indicadores de carga y fatiga
 
-        👉 Usá la pestaña **Empezar análisis** para comenzar.
-        """
-    )
+    👉 Entrá en **Empezar análisis** para comenzar.
+    """)
 
-# ======================================================
-# EMPEZAR ANÁLISIS
-# ======================================================
+# ==================================
+# EMPEZAR
+# ==================================
 with tab_inicio:
-    st.markdown(
-        """
-        ### ▶️ Empezar análisis
+    st.markdown("""
+    ### ▶️ Empezar análisis
 
-        1️⃣ Seleccioná las **posiciones** desde el panel lateral  
-        2️⃣ Ingresá a la pestaña del análisis que quieras  
-        3️⃣ Exportá rankings si lo necesitás  
+    - Elegí posiciones desde el panel izquierdo
+    - Navegá por las pestañas
+    - Exportá rankings cuando lo necesites
 
-        💡 Todos los análisis (excepto el ranking pico) se calculan
-        **con todas las fechas disponibles**.
-        """
-    )
+    ℹ️ Todos los análisis usan **todas las fechas**  
+    excepto el **ranking de pico**, que se elige por fecha.
+    """)
 
-# ======================================================
-# TAB – RANKING PICO DE VELOCIDAD (POR FECHA)
-# ======================================================
+# ==================================
+# RANKING PICO (POR FECHA)
+# ==================================
 with tab_pico:
 
     st.subheader("🏆 Ranking – Pico máximo de velocidad")
 
-    fechas_disponibles = sorted(df["Fecha"].unique())
-    fecha_sel = st.selectbox("Seleccioná una fecha", fechas_disponibles)
+    fechas = sorted(df["Fecha"].unique())
+    fecha_sel = st.selectbox("Seleccioná una fecha", fechas)
 
     df_fecha = df[df["Fecha"] == fecha_sel]
 
@@ -136,8 +127,7 @@ with tab_pico:
     bar_height = 0.36
 
     cmap = colors.LinearSegmentedColormap.from_list(
-        "velocidad",
-        ["#b11226", "#f1c40f", "#2ecc71"]
+        "velocidad", ["#b11226", "#f1c40f", "#2ecc71"]
     )
 
     norm = colors.Normalize(
@@ -176,10 +166,8 @@ with tab_pico:
             )
 
         ax.set_xlim(0, velocidades.max() * 1.08)
-
         ax.set_yticks(y_pos)
         ax.set_yticklabels(jugadores, fontsize=9, color="white")
-
         ax.set_ylim(y_pos.min() - step, y_pos.max() + step)
 
         ax.set_title(
@@ -212,24 +200,21 @@ with tab_pico:
 
         return fig
 
-    fig = dibujar_ranking_pico()
-    st.pyplot(fig)
+    st.pyplot(dibujar_ranking_pico())
 
     if st.button("📸 Exportar ranking pico"):
         archivo = dibujar_ranking_pico(exportar=True)
         st.success("Imagen exportada")
         st.image(archivo)
 
-# ======================================================
-# TAB – VELOCIDAD MEDIA (TODAS LAS FECHAS)
-# ======================================================
+# ==================================
+# VELOCIDAD MEDIA (TODAS LAS FECHAS)
+# ==================================
 with tab_media:
-
-    st.subheader("📊 Ranking – Velocidad media (todas las fechas)")
+    st.subheader("📊 Velocidad media (todas las fechas)")
 
     df_media = (
-        df
-        .groupby("Name", as_index=False)
+        df.groupby("Name", as_index=False)
         .agg({"Maximum Velocity (km/h)": "mean"})
         .rename(columns={"Maximum Velocity (km/h)": "Velocidad media (km/h)"})
         .sort_values("Velocidad media (km/h)")
@@ -237,12 +222,12 @@ with tab_media:
 
     st.dataframe(df_media.round(1))
 
-# ======================================================
-# TAB – EVOLUCIÓN + FATIGA
-# ======================================================
+# ==================================
+# EVOLUCIÓN + FATIGA
+# ==================================
 with tab_evolucion:
 
-   st.subheader("📈 Evolución individual")
+    st.subheader("📈 Evolución individual")
 
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
     df_j = df[df["Name"] == jugador_sel].sort_values("Fecha")
@@ -267,41 +252,74 @@ with tab_evolucion:
 )
 
     st.plotly_chart(fig, use_container_width=True)
+    
 
-# ======================================================
-# TAB – COMPARATIVA
-# ======================================================
+
+    # =========================
+    # ⚡ ACELERACIONES (AQUÍ)
+    # =========================
+    st.subheader("⚡ Evolución de aceleraciones")
+
+    fig_acc, ax_acc = plt.subplots()
+
+    ax_acc.plot(
+        df_j["Fecha"],
+        df_j["Acc Mts 2-4 m/ss"],
+        marker="o",
+        label="Acc 2–4 m/s²"
+    )
+
+    ax_acc.plot(
+        df_j["Fecha"],
+        df_j["Acc Mts + 4m/ss (m)"],
+        marker="o",
+        label="Acc +4 m/s²"
+    )
+
+    ax_acc.set_ylabel("Metros en aceleración")
+    ax_acc.set_title(f"Aceleraciones – {jugador_sel}")
+    ax_acc.legend()
+    plt.xticks(rotation=45)
+
+    st.pyplot(fig_acc)
+
+
+# ==================================
+# COMPARATIVA
+# ==================================
 with tab_comp:
+    st.subheader("👥 Comparativa")
 
-    st.subheader("👥 Comparativa entre jugadores")
+    jugadores = st.multiselect("Jugadores", sorted(df["Name"].unique()))
 
-    jugadores_sel = st.multiselect("Jugadores", sorted(df["Name"].unique()))
-
-    if len(jugadores_sel) >= 2:
+    if len(jugadores) >= 2:
         df_comp = (
-            df[df["Name"].isin(jugadores_sel)]
+            df[df["Name"].isin(jugadores)]
             .groupby("Name")
-            .agg({"Maximum Velocity (km/h)": "mean"})
-            .reset_index()
+            .agg({
+                "Maximum Velocity (km/h)": "mean",
+                "Total Distance (m)": "mean",
+                "Acc Mts + 4m/ss (m)": "mean",
+                "Decc Mts+4m/ss": "mean"
+            })
+            .round(1)
         )
 
-        st.dataframe(df_comp.round(1))
+        st.dataframe(df_comp)
 
-# ======================================================
-# TAB – PROMEDIOS EQUIPO
-# ======================================================
+# ==================================
+# PROMEDIOS EQUIPO
+# ==================================
 with tab_equipo:
-
     st.subheader("📌 Promedios del equipo")
 
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
 
-    c1.metric(
-        "Velocidad media equipo",
-        f"{df['Maximum Velocity (km/h)'].mean():.1f} km/h"
-    )
+    c1.metric("Velocidad media",
+              f"{df['Maximum Velocity (km/h)'].mean():.1f} km/h")
 
-    c2.metric(
-        "Pico máximo equipo",
-        f"{df['Maximum Velocity (km/h)'].max():.1f} km/h"
-    )
+    c2.metric("Pico máximo",
+              f"{df['Maximum Velocity (km/h)'].max():.1f} km/h")
+
+    c3.metric("Distancia media",
+              f"{df['Total Distance (m)'].mean():.0f} m")
