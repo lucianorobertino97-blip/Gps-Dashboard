@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import colors
@@ -241,27 +242,31 @@ with tab_media:
 # ======================================================
 with tab_evolucion:
 
-    st.subheader("📈 Evolución individual")
+   st.subheader("📈 Evolución individual")
 
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
+    df_j = df[df["Name"] == jugador_sel].sort_values("Fecha")
 
-    df_jugador = df[df["Name"] == jugador_sel].sort_values("Fecha")
+    fig = go.Figure()
 
-    fig, ax = plt.subplots()
-    ax.plot(df_jugador["Fecha"], df_jugador["Maximum Velocity (km/h)"], marker="o")
-    ax.set_ylabel("Velocidad máxima (km/h)")
-    ax.set_title(jugador_sel)
-    plt.xticks(rotation=45)
+    fig.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Maximum Velocity (km/h)"],
+    mode="lines+markers",
+    name="Velocidad máxima",
+    hovertemplate=
+        "<b>Fecha:</b> %{x}<br>" +
+        "<b>Velocidad:</b> %{y:.1f} km/h<extra></extra>"
+))
 
-    st.pyplot(fig)
+    fig.update_layout(
+    title=f"Evolución individual – {jugador_sel}",
+    yaxis_title="Velocidad máxima (km/h)",
+    xaxis_title="Fecha",
+    hovermode="closest"
+)
 
-    prom = df_jugador["Maximum Velocity (km/h)"].mean()
-    ultima = df_jugador.iloc[-1]["Maximum Velocity (km/h)"]
-
-    if ultima < prom * 0.95:
-        st.error("⚠️ Posible fatiga detectada")
-    else:
-        st.success("✅ Rendimiento normal")
+    st.plotly_chart(fig, use_container_width=True)
 
 # ======================================================
 # TAB – COMPARATIVA
