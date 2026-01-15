@@ -10,7 +10,7 @@ from matplotlib import colors
 # CONFIG
 # ==================================
 st.set_page_config(
-    page_title="GPS Club Atletico Colon",
+    page_title="Dashboard GPS",
     layout="wide"
 )
 
@@ -42,7 +42,7 @@ df = df[df["Position Name"].isin(posiciones_sel)].copy()
 # ==================================
 # TÍTULO
 # ==================================
-st.title("📊 GPS Club Atletico Colon")
+st.title("📊 Dashboard GPS")
 
 # ==================================
 # PESTAÑAS
@@ -63,7 +63,7 @@ tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_eq
 with tab_bienvenida:
     st.markdown(
         """
-        ### 👋 Bienvenido
+        ### 👋 Bienvenido al Dashboard GPS
 
         Esta herramienta está diseñada para **analizar el rendimiento físico**
         de los jugadores a partir de datos GPS.
@@ -288,4 +288,3 @@ with tab_equipo:
         "Pico máximo equipo",
         f"{df['Maximum Velocity (km/h)'].max():.1f} km/h"
     )
-
