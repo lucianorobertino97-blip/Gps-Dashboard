@@ -10,7 +10,7 @@ from matplotlib import colors
 # CONFIG
 # ==================================
 st.set_page_config(
-    page_title="Dashboard GPS",
+    page_title="GPS Club Atletico Colon",
     layout="wide"
 )
 
@@ -29,6 +29,9 @@ df = cargar_datos()
 # SIDEBAR – FILTRO POSICIÓN
 # ==================================
 st.sidebar.header("Filtros")
+if st.sidebar.button("🔄 Actualizar datos"):
+    st.cache_data.clear()
+    st.rerun()
 
 posiciones = sorted(df["Position Name"].dropna().unique())
 posiciones_sel = st.sidebar.multiselect(
@@ -63,7 +66,7 @@ tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_eq
 with tab_bienvenida:
     st.markdown(
         """
-        ### 👋 Bienvenido al Dashboard GPS
+        ### 👋 Bienvenido
 
         Esta herramienta está diseñada para **analizar el rendimiento físico**
         de los jugadores a partir de datos GPS.
