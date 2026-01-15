@@ -56,10 +56,6 @@ posiciones_sel = st.sidebar.multiselect(
 df = df[df["Position Name"].isin(posiciones_sel)].copy()
 
 # ==================================
-# TÍTULO
-# ==================================
-st.title("📊 GPS Club Atletico Colon de Santa Fe")
-
 # ==================================
 # PESTAÑAS
 # ==================================
