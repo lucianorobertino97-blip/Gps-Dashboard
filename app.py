@@ -63,7 +63,7 @@ tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_eq
 with tab_bienvenida:
     st.markdown(
         """
-        ### 👋 Bienvenido al Dashboard GPS
+        ### 👋 Bienvenido
 
         Esta herramienta está diseñada para **analizar el rendimiento físico**
         de los jugadores a partir de datos GPS.
