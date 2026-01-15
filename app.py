@@ -75,8 +75,6 @@ with tab_bienvenida:
     st.markdown("""
     ### 👋 Bienvenido
 
-    Dashboard de análisis **GPS profesional**.
-
     - Rankings de velocidad
     - Evolución individual
     - Comparativas
