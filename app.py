@@ -13,6 +13,19 @@ st.set_page_config(
     page_title="GPS Club Atletico Colon",
     layout="wide"
 )
+col1, col2 = st.columns([1, 6])
+
+with col1:
+    st.image(
+        "escudo_colon.png",
+        width=120,   # probá entre 100 y 140
+    )
+
+with col2:
+    st.markdown(
+        "<h1 style='margin-bottom:0;'>GPS Club Atlético Colón</h1>",
+        unsafe_allow_html=True
+    )
 
 # ==================================
 # CARGA DE DATOS
