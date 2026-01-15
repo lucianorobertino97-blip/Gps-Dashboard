@@ -10,7 +10,7 @@ from matplotlib import colors
 # CONFIG
 # ==================================
 st.set_page_config(
-    page_title="Dashboard GPS",
+    page_title="GPS Club Atletico Colon",
     layout="wide"
 )
 
