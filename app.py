@@ -294,27 +294,138 @@ st.plotly_chart(fig_acc, use_container_width=True)
 
 
 # ==================================
-# COMPARATIVA
+
+        COMPARATIVA (INTERACTIVA)
 # ==================================
 with tab_comp:
-    st.subheader("👥 Comparativa")
 
-    jugadores = st.multiselect("Jugadores", sorted(df["Name"].unique()))
+    st.subheader("👥 Comparativa entre jugadores")
 
-    if len(jugadores) >= 2:
-        df_comp = (
-            df[df["Name"].isin(jugadores)]
-            .groupby("Name")
-            .agg({
-                "Maximum Velocity (km/h)": "mean",
-                "Total Distance (m)": "mean",
-                "Acc Mts + 4m/ss (m)": "mean",
-                "Decc Mts+4m/ss": "mean"
-            })
-            .round(1)
-        )
+    jugadores_sel = st.multiselect(
+        "Jugadores",
+        sorted(df["Name"].unique())
+    )
 
-        st.dataframe(df_comp)
+    if len(jugadores_sel) < 2:
+        st.info("Seleccioná al menos 2 jugadores para comparar")
+        st.stop()
+
+    # =========================================
+    # 🏃‍♂️ COMPARATIVA – VELOCIDAD PICO
+    # =========================================
+    df_vel = (
+        df[df["Name"].isin(jugadores_sel)]
+        .groupby("Name", as_index=False)
+        .agg({
+            "Maximum Velocity (km/h)": "max"
+        })
+    )
+
+    fig_vel = px.bar(
+        df_vel,
+        x="Name",
+        y="Maximum Velocity (km/h)",
+        text_auto=".1f",
+        title="🏃‍♂️ Pico de velocidad por jugador",
+        labels={
+            "Name": "Jugador",
+            "Maximum Velocity (km/h)": "Velocidad máxima (km/h)"
+        }
+    )
+
+    fig_vel.update_traces(
+        hovertemplate=
+        "Jugador: %{x}<br>" +
+        "Velocidad pico: %{y:.1f} km/h"
+    )
+
+    fig_vel.update_layout(
+        hovermode="x unified",
+        yaxis_title="km/h"
+    )
+
+    st.plotly_chart(fig_vel, use_container_width=True)
+
+    # =========================================
+    # ⚡ COMPARATIVA – ACELERACIONES
+    # =========================================
+    df_acc = (
+        df[df["Name"].isin(jugadores_sel)]
+        .groupby("Name", as_index=False)
+        .agg({
+            "Acc Mts 2-4 m/ss": "sum",
+            "Acc Mts + 4m/ss (m)": "sum"
+        })
+    )
+
+    fig_acc = go.Figure()
+
+    fig_acc.add_bar(
+        x=df_acc["Name"],
+        y=df_acc["Acc Mts 2-4 m/ss"],
+        name="Acc 2–4 m/s²",
+        hovertemplate=
+        "Jugador: %{x}<br>" +
+        "Acc 2–4 m/s²: %{y:.0f} m"
+    )
+
+    fig_acc.add_bar(
+        x=df_acc["Name"],
+        y=df_acc["Acc Mts + 4m/ss (m)"],
+        name="Acc +4 m/s²",
+        hovertemplate=
+        "Jugador: %{x}<br>" +
+        "Acc +4 m/s²: %{y:.0f} m"
+    )
+
+    fig_acc.update_layout(
+        title="⚡ Metros en aceleración",
+        barmode="group",
+        xaxis_title="Jugador",
+        yaxis_title="Metros",
+        hovermode="x unified"
+    )
+
+    st.plotly_chart(fig_acc, use_container_width=True)
+    
+        # =========================================
+    
+      # =========================================
+    # 🏃‍♂️ EVOLUCIÓN – TOTAL DISTANCE (POR FECHA)
+    # =========================================
+
+    df_dist = (
+        df[df["Name"].isin(jugadores_sel)]
+        .sort_values("Fecha")
+    )
+
+    fig_dist = px.line(
+        df_dist,
+        x="Fecha",
+        y="Total Distance (m)",
+        color="Name",
+        markers=True,
+        title="📈 Evolución de la distancia total por jugador",
+        labels={
+            "Fecha": "Fecha",
+            "Total Distance (m)": "Distancia total (m)",
+            "Name": "Jugador"
+        }
+    )
+
+    fig_dist.update_traces(
+        hovertemplate=
+        "Jugador: %{legendgroup}<br>" +
+        "Fecha: %{x}<br>" +
+        "Distancia: %{y:,.0f} m"
+    )
+
+    fig_dist.update_layout(
+        hovermode="x unified",
+        yaxis_title="Metros"
+    )
+
+    st.plotly_chart(fig_dist, use_container_width=True)
 
 # ==================================
 # PROMEDIOS EQUIPO
