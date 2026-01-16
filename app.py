@@ -294,8 +294,7 @@ st.plotly_chart(fig_acc, use_container_width=True)
 
 
 # ==================================
-
-        COMPARATIVA (INTERACTIVA)
+ #COMPARATIVA (INTERACTIVA)
 # ==================================
 with tab_comp:
 
