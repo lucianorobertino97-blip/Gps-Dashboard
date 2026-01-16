@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import plotly.express as px
+
 
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import colors
@@ -74,6 +76,8 @@ tab_bienvenida, tab_inicio, tab_pico, tab_media, tab_evolucion, tab_comp, tab_eq
 with tab_bienvenida:
     st.markdown("""
     ### 👋 Bienvenido
+
+    Dashboard de análisis **GPS profesional**.
 
     - Rankings de velocidad
     - Evolución individual
@@ -221,6 +225,7 @@ with tab_media:
     st.dataframe(df_media.round(1))
 
 # ==================================
+# ==================================
 # EVOLUCIÓN + FATIGA
 # ==================================
 with tab_evolucion:
@@ -230,71 +235,72 @@ with tab_evolucion:
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
     df_j = df[df["Name"] == jugador_sel].sort_values("Fecha")
 
+    # -------------------------
+    # VELOCIDAD MÁXIMA
+    # -------------------------
     fig = go.Figure()
 
     fig.add_trace(go.Scatter(
-    x=df_j["Fecha"],
-    y=df_j["Maximum Velocity (km/h)"],
-    mode="lines+markers",
-    name="Velocidad máxima",
-    hovertemplate=
-        "<b>Fecha:</b> %{x}<br>" +
-        "<b>Velocidad:</b> %{y:.1f} km/h<extra></extra>"
-))
+        x=df_j["Fecha"],
+        y=df_j["Maximum Velocity (km/h)"],
+        mode="lines+markers",
+        name="Velocidad máxima",
+        hovertemplate=
+            "<b>Fecha:</b> %{x}<br>" +
+            "<b>Velocidad:</b> %{y:.1f} km/h<extra></extra>"
+    ))
 
     fig.update_layout(
-    title=f"Evolución individual – {jugador_sel}",
-    yaxis_title="Velocidad máxima (km/h)",
-    xaxis_title="Fecha",
-    hovermode="closest"
-)
+        title=f"Evolución individual – {jugador_sel}",
+        yaxis_title="Velocidad máxima (km/h)",
+        xaxis_title="Fecha",
+        hovermode="closest"
+    )
 
     st.plotly_chart(fig, use_container_width=True)
-    
-
 
     # =========================
-   
+    # ⚡ ACELERACIONES
+    # =========================
     st.subheader("⚡ Evolución individual – Aceleraciones")
 
-fig_acc = go.Figure()
+    fig_acc = go.Figure()
 
-# Aceleraciones 2–4 m/s²
-fig_acc.add_trace(go.Scatter(
-    x=df_j["Fecha"],
-    y=df_j["Acc Mts 2-4 m/ss"],
-    mode="lines+markers",
-    name="Acc 2–4 m/s²",
-    hovertemplate=
-        "<b>Fecha:</b> %{x}<br>" +
-        "<b>Metros:</b> %{y:.1f} m<extra></extra>"
-))
+    # Acc 2–4 m/s²
+    fig_acc.add_trace(go.Scatter(
+        x=df_j["Fecha"],
+        y=df_j["Acc Mts 2-4 m/ss"],
+        mode="lines+markers",
+        name="Acc 2–4 m/s²",
+        hovertemplate=
+            "<b>Fecha:</b> %{x}<br>" +
+            "<b>Metros:</b> %{y:.1f} m<extra></extra>"
+    ))
 
-# Aceleraciones +4 m/s²
-fig_acc.add_trace(go.Scatter(
-    x=df_j["Fecha"],
-    y=df_j["Acc Mts + 4m/ss (m)"],
-    mode="lines+markers",
-    name="Acc +4 m/s²",
-    hovertemplate=
-        "<b>Fecha:</b> %{x}<br>" +
-        "<b>Metros:</b> %{y:.1f} m<extra></extra>"
-))
+    # Acc +4 m/s²
+    fig_acc.add_trace(go.Scatter(
+        x=df_j["Fecha"],
+        y=df_j["Acc Mts + 4m/ss (m)"],
+        mode="lines+markers",
+        name="Acc +4 m/s²",
+        hovertemplate=
+            "<b>Fecha:</b> %{x}<br>" +
+            "<b>Metros:</b> %{y:.1f} m<extra></extra>"
+    ))
 
-fig_acc.update_layout(
-    title=f"Aceleraciones – {jugador_sel}",
-    xaxis_title="Fecha",
-    yaxis_title="Metros en aceleración",
-    hovermode="closest",
-    legend_title="Tipo de aceleración"
-)
+    fig_acc.update_layout(
+        title=f"Aceleraciones – {jugador_sel}",
+        xaxis_title="Fecha",
+        yaxis_title="Metros en aceleración",
+        hovermode="closest",
+        legend_title="Tipo de aceleración"
+    )
 
-st.plotly_chart(fig_acc, use_container_width=True)
-
+    st.plotly_chart(fig_acc, use_container_width=True)
 
 
 # ==================================
- #COMPARATIVA (INTERACTIVA)
+# COMPARATIVA (INTERACTIVA)
 # ==================================
 with tab_comp:
 
@@ -425,6 +431,7 @@ with tab_comp:
     )
 
     st.plotly_chart(fig_dist, use_container_width=True)
+
 
 # ==================================
 # PROMEDIOS EQUIPO
