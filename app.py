@@ -254,32 +254,43 @@ with tab_evolucion:
 
 
     # =========================
-    # ⚡ ACELERACIONES (AQUÍ)
-    # =========================
-    st.subheader("⚡ Evolución de aceleraciones")
+   
+    st.subheader("⚡ Evolución individual – Aceleraciones")
 
-    fig_acc, ax_acc = plt.subplots()
+fig_acc = go.Figure()
 
-    ax_acc.plot(
-        df_j["Fecha"],
-        df_j["Acc Mts 2-4 m/ss"],
-        marker="o",
-        label="Acc 2–4 m/s²"
-    )
+# Aceleraciones 2–4 m/s²
+fig_acc.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Acc Mts 2-4 m/ss"],
+    mode="lines+markers",
+    name="Acc 2–4 m/s²",
+    hovertemplate=
+        "<b>Fecha:</b> %{x}<br>" +
+        "<b>Metros:</b> %{y:.1f} m<extra></extra>"
+))
 
-    ax_acc.plot(
-        df_j["Fecha"],
-        df_j["Acc Mts + 4m/ss (m)"],
-        marker="o",
-        label="Acc +4 m/s²"
-    )
+# Aceleraciones +4 m/s²
+fig_acc.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Acc Mts + 4m/ss (m)"],
+    mode="lines+markers",
+    name="Acc +4 m/s²",
+    hovertemplate=
+        "<b>Fecha:</b> %{x}<br>" +
+        "<b>Metros:</b> %{y:.1f} m<extra></extra>"
+))
 
-    ax_acc.set_ylabel("Metros en aceleración")
-    ax_acc.set_title(f"Aceleraciones – {jugador_sel}")
-    ax_acc.legend()
-    plt.xticks(rotation=45)
+fig_acc.update_layout(
+    title=f"Aceleraciones – {jugador_sel}",
+    xaxis_title="Fecha",
+    yaxis_title="Metros en aceleración",
+    hovermode="closest",
+    legend_title="Tipo de aceleración"
+)
 
-    st.pyplot(fig_acc)
+st.plotly_chart(fig_acc, use_container_width=True)
+
 
 
 # ==================================
