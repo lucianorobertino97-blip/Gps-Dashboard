@@ -33,12 +33,14 @@ with col2:
 # ==================================
 @st.cache_data
 def cargar_datos():
-    df = pd.read_excel("carga.xlsx", sheet_name=0)
-    Baselines = pd.read_excel("carga.xlsx", sheet_name=1)
-
+    df = pd.read_excel("carga.xlsx")
     df["Fecha"] = pd.to_datetime(df["Fecha"])
 
+    Baselines = pd.read_excel("carga.xlsx", sheet_name="Baselines")
+
     return df, Baselines
+
+df, Baselines = cargar_datos()
 
 # ==================================
 # SIDEBAR
