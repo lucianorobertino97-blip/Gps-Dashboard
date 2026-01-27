@@ -233,7 +233,17 @@ with tab_evolucion:
     st.subheader("📈 Evolución individual")
 
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
-    df_j = df[df["Name"] == jugador_sel].sort_values("Fecha")
+    df_j = df[df["Name"] == jugador_sel].sort_values("Fecha") 
+    # =========================
+    # HIGH SPEED RUNNING (>20 km/h)
+    # =========================
+    df_j["High Speed Running (m)"] = (
+    df_j["Mts 20-25.1km/h (m)"] +
+    df_j["Mts +25.2km/h (m)"]
+)
+
+    
+    
 
     # -------------------------
     # VELOCIDAD MÁXIMA
@@ -297,7 +307,47 @@ with tab_evolucion:
     )
 
     st.plotly_chart(fig_acc, use_container_width=True)
+    # =========================
+    # 🏃‍♂️ HIGH SPEED RUNNING
+    # =========================
+    st.subheader("🏃‍♂️ Evolución individual – High Speed Running (>20 km/h)")
 
+    fig_hsr = go.Figure()
+
+    fig_hsr.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["High Speed Running (m)"],
+    mode="lines+markers",
+    name="HSR >20 km/h",
+    hovertemplate=
+        "<b>Fecha:</b> %{x}<br>" +
+        "<b>HSR:</b> %{y:,.0f} m<extra></extra>"
+      ))
+
+    fig_hsr.update_layout(
+    title=f"High Speed Running – {jugador_sel}",
+    xaxis_title="Fecha",
+    yaxis_title="Metros >20 km/h",
+    hovermode="closest"
+     )
+
+    st.plotly_chart(fig_hsr, use_container_width=True)
+
+# PROMEDIOS EQUIPO
+# ==================================
+with tab_equipo:
+    st.subheader("📌 Promedios del equipo")
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric("Velocidad media",
+              f"{df['Maximum Velocity (km/h)'].mean():.1f} km/h")
+
+    c2.metric("Pico máximo",
+              f"{df['Maximum Velocity (km/h)'].max():.1f} km/h")
+
+    c3.metric("Distancia media",
+              f"{df['Total Distance (m)'].mean():.0f} m")
 
 # ==================================
 # COMPARATIVA (INTERACTIVA)
@@ -434,18 +484,3 @@ with tab_comp:
 
 
 # ==================================
-# PROMEDIOS EQUIPO
-# ==================================
-with tab_equipo:
-    st.subheader("📌 Promedios del equipo")
-
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric("Velocidad media",
-              f"{df['Maximum Velocity (km/h)'].mean():.1f} km/h")
-
-    c2.metric("Pico máximo",
-              f"{df['Maximum Velocity (km/h)'].max():.1f} km/h")
-
-    c3.metric("Distancia media",
-              f"{df['Total Distance (m)'].mean():.0f} m")
