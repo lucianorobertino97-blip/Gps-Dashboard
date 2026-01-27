@@ -35,9 +35,12 @@ with col2:
 def cargar_datos():
     df = pd.read_excel("carga.xlsx")
     df["Fecha"] = pd.to_datetime(df["Fecha"])
-    return df
 
-df = cargar_datos()
+    Baselines = pd.read_excel("carga.xlsx", sheet_name="Baselines")
+
+    return df, Baselines
+
+df, Baselines = cargar_datos()
 
 # ==================================
 # SIDEBAR
@@ -235,12 +238,68 @@ with tab_evolucion:
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
     df_j = df[df["Name"] == jugador_sel].sort_values("Fecha") 
     # =========================
+    
+    st.subheader("Semáforo por microciclo en base a referencia")
+
+    # Baseline del jugador
+    base_j = Baselines[Baselines["Name"] == jugador_sel]
+
+    if base_j.empty:
+     st.warning("Este jugador no tiene baseline cargado")
+    else:
+     acc_base = base_j["Acc Mts 2-4 m/ss T"].values[0]
+     dec_base = base_j["Decc Mts 2-4m/ss T"].values[0]
+
+    # 👉 SUMA POR MICROCICLO
+    micro_df = (
+        df[df["Name"] == jugador_sel]
+        .groupby("Micro", as_index=False)
+        .agg({
+            "Acc Mts 2-4 m/ss": "sum",
+            "Acc Mts + 4m/ss (m)": "sum",
+            "Decc Mts 2-4m/ss": "sum",
+            "Decc Mts+4m/ss": "sum"
+        })
+    )
+
+    # Totales del micro
+    micro_df["Acc Micro"] = micro_df["Acc Mts 2-4 m/ss"] + micro_df["Acc Mts + 4m/ss (m)"]
+    micro_df["Dec Micro"] = micro_df["Decc Mts 2-4m/ss"] + micro_df["Decc Mts+4m/ss"]
+
+    # % contra su micro 100
+    micro_df["Acc %"] = micro_df["Acc Micro"] / acc_base * 100
+    micro_df["Dec %"] = micro_df["Dec Micro"] / dec_base * 100
+
+    # FUNCIÓN SEMÁFORO
+    def semaforo(x):
+        if x >= 100:
+            return "🟢 Alto"
+        elif x >= 90:
+            return "🟡 Normal"
+        else:
+            return "🔴 Bajo"
+
+    micro_df["Estado Acc"] = micro_df["Acc %"].apply(semaforo)
+    micro_df["Estado Dec"] = micro_df["Dec %"].apply(semaforo)
+
+    st.dataframe(
+        micro_df[[
+            "Micro",
+            "Acc Micro",
+            "Acc %",
+            "Estado Acc",
+            "Dec Micro",
+            "Dec %",
+            "Estado Dec"
+        ]].round(1),
+        use_container_width=True
+    )
     # HIGH SPEED RUNNING (>20 km/h)
     # =========================
     df_j["High Speed Running (m)"] = (
     df_j["Mts 20-25.1km/h (m)"] +
     df_j["Mts +25.2km/h (m)"]
-)
+    )
 
     
     
@@ -261,7 +320,7 @@ with tab_evolucion:
     ))
 
     fig.update_layout(
-        title=f"Evolución individual – {jugador_sel}",
+        title=f"Velocidad maxima – {jugador_sel}",
         yaxis_title="Velocidad máxima (km/h)",
         xaxis_title="Fecha",
         hovermode="closest"
@@ -272,7 +331,7 @@ with tab_evolucion:
     # =========================
     # ⚡ ACELERACIONES
     # =========================
-    st.subheader("⚡ Evolución individual – Aceleraciones")
+    st.subheader("⚡ – Aceleraciones")
 
     fig_acc = go.Figure()
 
@@ -310,7 +369,7 @@ with tab_evolucion:
     # =========================
     # 🏃‍♂️ HIGH SPEED RUNNING
     # =========================
-    st.subheader("🏃‍♂️ Evolución individual – High Speed Running (>20 km/h)")
+    st.subheader("🏃‍♂️ – High Speed Running")
 
     fig_hsr = go.Figure()
 
