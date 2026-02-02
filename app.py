@@ -31,16 +31,41 @@ with col2:
 # ==================================
 # CARGA DE DATOS
 # ==================================
+# ==================================
+# CARGA DE DATOS DESDE GOOGLE SHEETS
+# ==================================
 @st.cache_data
 def cargar_datos():
-    df = pd.read_excel("carga.xlsx")
+    url = "https://docs.google.com/spreadsheets/d/1rkV1FOM8cLz6jJ1OotB6pUWIyzSoYcrPa6rubqn3aX8/export?format=xlsx"
+    
+    df = pd.read_excel(url, sheet_name=0)          # Hoja principal (GPS)
+    Baselines = pd.read_excel(url, sheet_name=1)   # Hoja 2 (Baselines)
+
     df["Fecha"] = pd.to_datetime(df["Fecha"])
-
-    Baselines = pd.read_excel("carga.xlsx", sheet_name="Baselines")
-
+    
     return df, Baselines
 
 df, Baselines = cargar_datos()
+
+# ==================================
+# VARIABLES DERIVADAS
+# ==================================
+df["High Speed Running (m)"] = (
+    df["Mts 20-25.1km/h (m)"] +
+    df["Mts +25.2km/h (m)"]
+)
+
+import os
+
+def obtener_foto_jugador(nombre):
+    carpeta = "fotos_jugadores"
+    extensiones = [".png", ".jpg", ".jpeg"]
+
+    for ext in extensiones:
+        ruta = os.path.join(carpeta, f"{nombre}{ext}")
+        if os.path.exists(ruta):
+            return ruta
+    return None
 
 # ==================================
 # SIDEBAR
@@ -238,7 +263,27 @@ with tab_evolucion:
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
     df_j = df[df["Name"] == jugador_sel].sort_values("Fecha") 
     # =========================
-    
+    col_img, col_stats = st.columns([1, 3])
+
+with col_img:
+    foto = obtener_foto_jugador(jugador_sel)
+    if foto:
+        st.image(foto, use_container_width=True)
+    else:
+        st.info("Sin foto del jugador")
+
+with col_stats:
+    st.markdown(f"## {jugador_sel}")
+    st.markdown("### Datos generales")
+
+    st.metric("Velocidad pico histórica",
+              f"{df_j['Maximum Velocity (km/h)'].max():.1f} km/h")
+
+    st.metric("Distancia media",
+              f"{df_j['Total Distance (m)'].mean():.0f} m")
+
+    st.metric("HSR medio (>20 km/h)",
+              f"{df_j['High Speed Running (m)'].mean():.0f} m")
     st.subheader("Semáforo por microciclo en base a referencia")
 
     # Baseline del jugador
