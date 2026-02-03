@@ -449,6 +449,57 @@ with tab_evolucion:
     )
 
     st.plotly_chart(fig_acc, use_container_width=True)
+
+     # =========================  
+    # 🛑 DESACELERACIONES INTERACTIVAS
+    # =========================
+    st.subheader("Evolución de desaceleraciones")
+
+    fig_dec = go.Figure()
+
+    fig_dec.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Decc Mts 2-4m/ss"],
+    mode="lines+markers",
+    name="Dec 2–4 m/s²",
+    hovertemplate=
+        "<b>%{x}</b><br>" +
+        "Dec 2–4: %{y:.0f} m<extra></extra>"
+))
+
+    fig_dec.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Decc Mts+4m/ss"],
+    mode="lines+markers",
+    name="Dec +4 m/s²",
+    hovertemplate=
+        "<b>%{x}</b><br>" +
+        "Dec +4: %{y:.0f} m<extra></extra>"
+))
+
+    # TOTAL DESACELERACIONES
+    df_j["Dec Total"] = df_j["Decc Mts 2-4m/ss"] + df_j["Decc Mts+4m/ss"]
+
+    fig_dec.add_trace(go.Scatter(
+    x=df_j["Fecha"],
+    y=df_j["Dec Total"],
+    mode="lines+markers",
+    name="Total Dec",
+    line=dict(dash="dash"),
+    hovertemplate=
+        "<b>%{x}</b><br>" +
+        "Total Dec: %{y:.0f} m<extra></extra>"
+))
+
+    fig_dec.update_layout(
+    yaxis_title="Metros en desaceleración",
+    xaxis_title="Fecha",
+    template="plotly_dark",
+    hovermode="x unified",
+    height=420
+)
+
+    st.plotly_chart(fig_dec, use_container_width=True, key="dec_evolucion")
     # =========================
     # 🏃‍♂️ HIGH SPEED RUNNING
     # =========================
