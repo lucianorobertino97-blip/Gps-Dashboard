@@ -9,13 +9,31 @@ import plotly.express as px
 from matplotlib.patches import FancyBboxPatch
 from matplotlib import colors
 
-# ==================================
-# CONFIG
-# ==================================
-st.set_page_config(
-    page_title="GPS Club Atletico Colon",
-    layout="wide"
-)
+def kpi_card(titulo, valor, unidad, ratio):
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(145deg,#111,#1a1a1a);
+        padding:20px;
+        border-radius:18px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+        margin-bottom:12px;
+    ">
+        <div style="color:#9aa0a6; font-size:14px; margin-bottom:6px;">
+            {titulo}
+        </div>
+        <div style="color:white; font-size:34px; font-weight:700;">
+            {valor} {unidad}
+        </div>
+        <div style="background:#222; border-radius:10px; height:8px; margin-top:12px;">
+            <div style="
+                width:{min(ratio*100,100)}%;
+                background:#1f77ff;
+                height:100%;
+                border-radius:10px;">
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 6])
 
@@ -261,29 +279,49 @@ with tab_evolucion:
     st.subheader("📈 Evolución individual")
 
     jugador_sel = st.selectbox("Jugador", sorted(df["Name"].unique()))
-    df_j = df[df["Name"] == jugador_sel].sort_values("Fecha") 
-    # =========================
-    col_img, col_stats = st.columns([1, 3])
+    df_j = df[df["Name"] == jugador_sel].sort_values("Fecha")
 
-with col_img:
-    foto = obtener_foto_jugador(jugador_sel)
-    if foto:
-        st.image(foto, use_container_width=True)
-    else:
-        st.info("Sin foto del jugador")
+    vel_pico = df_j["Maximum Velocity (km/h)"].max()
+    dist_media = df_j["Total Distance (m)"].mean()
+    hsr_media = df_j["High Speed Running (m)"].mean()
 
-with col_stats:
-    st.markdown(f"## {jugador_sel}")
-    st.markdown("### Datos generales")
+    # COLUMNAS PRINCIPALES
+    col_img, col_stats = st.columns([1,3], vertical_alignment="center")
 
-    st.metric("Velocidad pico histórica",
-              f"{df_j['Maximum Velocity (km/h)'].max():.1f} km/h")
+    # FOTO
+    with col_img:
+        foto = obtener_foto_jugador(jugador_sel)
+        if foto:
+            st.image(foto, width=260)   # ⚠️ NO usar use_container_width
+        else:
+            st.info("Sin foto del jugador")
 
-    st.metric("Distancia media",
-              f"{df_j['Total Distance (m)'].mean():.0f} m")
+    # BARRAS KPI
+    with col_stats:
 
-    st.metric("HSR medio (>20 km/h)",
-              f"{df_j['High Speed Running (m)'].mean():.0f} m")
+        st.markdown(f"## {jugador_sel}")
+
+        def barra_kpi(titulo, valor, maximo, unidad):
+            progreso = min(valor / maximo, 1)
+
+            st.markdown(f"""
+            <div style="margin-bottom:22px">
+                <div style="font-size:14px; opacity:0.8">{titulo}</div>
+                <div style="font-size:28px; font-weight:700">{valor:.1f} {unidad}</div>
+                <div style="height:6px;background:#222;border-radius:6px;margin-top:6px;">
+                    <div style="width:{progreso*100}%;height:6px;
+                        background:linear-gradient(90deg,#00c6ff,#0072ff);
+                        border-radius:6px;">
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        barra_kpi("Velocidad pico histórica", vel_pico, 36, "km/h")
+        barra_kpi("Distancia media", dist_media, 12000, "m")
+        barra_kpi("HSR medio (>20 km/h)", hsr_media, 600, "m")
+
+
     st.subheader("Semáforo por microciclo en base a referencia")
 
     # Baseline del jugador
@@ -441,17 +479,31 @@ with col_stats:
 # ==================================
 with tab_equipo:
     st.subheader("📌 Promedios del equipo")
-
     c1, c2, c3 = st.columns(3)
 
-    c1.metric("Velocidad media",
-              f"{df['Maximum Velocity (km/h)'].mean():.1f} km/h")
+    with c1:
+     st.markdown(f"""
+    <div class="kpi-card kpi-green">
+        <div class="kpi-title">Velocidad media</div>
+        <div class="kpi-value">{df['Maximum Velocity (km/h)'].mean():.1f} km/h</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    c2.metric("Pico máximo",
-              f"{df['Maximum Velocity (km/h)'].max():.1f} km/h")
+    with c2:
+     st.markdown(f"""
+    <div class="kpi-card kpi-red">
+        <div class="kpi-title">Pico máximo</div>
+        <div class="kpi-value">{df['Maximum Velocity (km/h)'].max():.1f} km/h</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    c3.metric("Distancia media",
-              f"{df['Total Distance (m)'].mean():.0f} m")
+    with c3:
+      st.markdown(f"""
+    <div class="kpi-card kpi-blue">
+        <div class="kpi-title">Distancia media</div>
+        <div class="kpi-value">{df['Total Distance (m)'].mean():.0f} m</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==================================
 # COMPARATIVA (INTERACTIVA)
